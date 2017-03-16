@@ -7,14 +7,46 @@ services:
     ports:
       - "22181:22181"
     environment:
+      ZOOKEEPER_SERVER_ID: 1
       ZOOKEEPER_CLIENT_PORT: 22181
       ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zookeeper1:22888:23888;zookeeper2:32888:33888;zookeeper3:42888:43888
+
+  zookeeper2:
+    image: confluentinc/cp-zookeeper
+    hostname: zookeeper2
+    ports:
+      - "32181:32181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 2
+      ZOOKEEPER_CLIENT_PORT: 32181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zookeeper1:22888:23888;zookeeper2:32888:33888;zookeeper3:42888:43888
+
+  zookeeper3:
+    image: confluentinc/cp-zookeeper
+    hostname: zookeeper3
+    ports:
+      - "42181:42181"
+    environment:
+      ZOOKEEPER_SERVER_ID: 3
+      ZOOKEEPER_CLIENT_PORT: 42181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_INIT_LIMIT: 5
+      ZOOKEEPER_SYNC_LIMIT: 2
+      ZOOKEEPER_SERVERS: zookeeper1:22888:23888;zookeeper2:32888:33888;zookeeper3:42888:43888
 
   broker1:
     image: confluentinc/cp-enterprise-kafka:latest
     hostname: broker1
     depends_on:
       - zookeeper1
+      - zookeeper2
+      - zookeeper3
     ports:
       - '29092'
     environment:
@@ -33,6 +65,8 @@ services:
     hostname: broker2
     depends_on:
       - zookeeper1
+      - zookeeper2
+      - zookeeper3
     ports:
       - '39092'
     environment:
@@ -51,6 +85,8 @@ services:
     hostname: broker3
     depends_on:
       - zookeeper1
+      - zookeeper2
+      - zookeeper3
     ports:
       - '49092'
     environment:
@@ -69,7 +105,11 @@ services:
     hostname: schema_registry
     depends_on:
       - zookeeper1
+      - zookeeper2
+      - zookeeper3
       - broker1
+      - broker2
+      - broker3
     ports:
       - '8081'
     environment:
@@ -81,7 +121,11 @@ services:
     hostname: connect
     depends_on:
       - zookeeper1
+      - zookeeper2
+      - zookeeper3
       - broker1
+      - broker2
+      - broker3
       - schema_registry
     ports:
       - "8083:8083"
@@ -106,7 +150,11 @@ services:
     hostname: control-center
     depends_on:
       - zookeeper1
+      - zookeeper2
+      - zookeeper3
       - broker1
+      - broker2
+      - broker3
       - schema_registry
       - connect
     ports:
